@@ -18,5 +18,6 @@ const template = {
     myobject: "object"
 }
 
+
 console.log(data_checker.analyse(mydata,template))
 

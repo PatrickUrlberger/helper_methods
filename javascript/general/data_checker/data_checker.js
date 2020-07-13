@@ -1,8 +1,12 @@
 function analyse(payload,template){
+
     let correct = {}
     let wrong = {}
     let wrongtemplate = []
     let unavailable = []
+    if(payload == null || template == null){
+        return {error: "Invalid template or payload Object"}
+    }
     keys = Object.keys(template)
 
     keys.forEach(key => {
