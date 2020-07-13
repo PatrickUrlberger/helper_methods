@@ -15,6 +15,8 @@ function analyse(payload,template){
         let result = checkkey(payload,key,type)
         if(result.wrongtemplate)
         {wrongtemplate.push({key:key ,val:payload[key],template: type});return}
+        if(result.wrongkey)
+        {unavailable.push(key);return}
         if(result.correct){
             if(type == "float"){correct[key]= parseFloat(payload[key].toString().replace(",",".").replace(/ /g, ''));return}
             if(type == "boolean" && typeof payload[key] == "string"){correct[key] = (payload[key] == "true");return}
@@ -30,17 +32,20 @@ function analyse(payload,template){
         correct: correct,
         wrong: wrong,
         unavailable: unavailable,
-        wrongtemplate: wrongtemplate
+        wrongtemplate: wrongtemplate,
+
     }
 }
 
 
 function checkkey(object,key,type){
     if(key in object){
-        const no = {existing: true,correct: false,wrongtemplate: false}
-        const yes = {existing: true,correct: true,wrongtemplate: false}
-        const err_temp = {existing: true,correct: false,wrongtemplate: true}
+        const no = {existing: true,correct: false,wrongtemplate: false,wrongkey: false}
+        const yes = {existing: true,correct: true,wrongtemplate: false, wrongkey: false}
+        const err_temp = {existing: true,correct: false,wrongtemplate: true,wrongkey: false}
+        const err_key = {existing: true,correct: false,wrongtemplate: false,wrongkey: true}
         const thisval = object[key]
+        if(typeof(thisval) == "undefined"){return err_key}
 
         switch (type) {
             case "string":
