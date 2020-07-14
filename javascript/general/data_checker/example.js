@@ -1,4 +1,7 @@
-const data_checker = require("./data_checker.js")
+const Checker = require("./data_checker.js")
+
+
+const mychecker = new Checker()
 
 const mydata = {
     myname: "name", //must be string
@@ -19,5 +22,5 @@ const template = {
 }
 
 
-console.log(data_checker.analyse(mydata,template))
+console.log(mychecker.analyse(mydata,template))
 

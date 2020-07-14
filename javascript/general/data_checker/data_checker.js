@@ -1,3 +1,47 @@
+const no = {existing: true,correct: false,wrongtemplate: false,wrongkey: false}
+const yes = {existing: true,correct: true,wrongtemplate: false, wrongkey: false}
+const err_temp = {existing: true,correct: false,wrongtemplate: true,wrongkey: false}
+const err_key = {existing: true,correct: false,wrongtemplate: false,wrongkey: true}
+
+
+
+function stringchecker(thisval){
+    if(typeof thisval == "string"){return yes}
+    else{return no}
+}
+
+function integerchecker(thisval){
+    if(Number.isInteger(parseInt(thisval))){return yes}
+    else{return no}
+}
+
+function floatchecker(thisval){
+    let withdot = thisval.toString().replace(",",".").replace(/ /g, '');
+    if(parseFloat(withdot).toString() != withdot){return no}
+    if(Number.isNaN(parseFloat(withdot))){return no}
+    if(parseFloat(withdot).toString() != withdot){return no}
+    if(parseFloat(withdot) - parseInt(withdot) == 0){return yes}
+    if(parseFloat(withdot) % 1 !== 0){return yes}
+    else{return no}
+}
+
+function booleanchecker(thisval){
+    if(thisval == "true" || thisval == "false"){return yes}
+    if(typeof thisval == "boolean"){return yes}
+    else{return no}
+}
+
+function arraychecker(thisval){
+    if(Array.isArray(thisval)){return yes}
+    else{return no}
+}
+
+function objectchecker(thisval){
+    if(Array.isArray(thisval)){return no}
+    if(typeof thisval == "object"){return yes}
+    else{return no}
+}
+
 function analyse(payload,template){
 
     let correct = {}
@@ -37,46 +81,30 @@ function analyse(payload,template){
     }
 }
 
-
 function checkkey(object,key,type){
     if(key in object){
-        const no = {existing: true,correct: false,wrongtemplate: false,wrongkey: false}
-        const yes = {existing: true,correct: true,wrongtemplate: false, wrongkey: false}
-        const err_temp = {existing: true,correct: false,wrongtemplate: true,wrongkey: false}
-        const err_key = {existing: true,correct: false,wrongtemplate: false,wrongkey: true}
         const thisval = object[key]
         if(typeof(thisval) == "undefined"){return err_key}
 
         switch (type) {
             case "string":
-                if(typeof thisval == type){return yes}
-                else{return no}
+                return stringchecker(thisval)
 
             case "integer":
-                if(Number.isInteger(parseInt(thisval))){return yes}
-                else{return no}
+                return integerchecker(thisval)
  
             case "float":
-                let withdot = thisval.toString().replace(",",".").replace(/ /g, '');
-                if(parseFloat(withdot).toString() != withdot){return no}
-                if(Number.isNaN(parseFloat(withdot))){return no}
-                if(parseFloat(withdot).toString() != withdot){return no}
-                if(parseFloat(withdot) - parseInt(withdot) == 0){return yes}
-                if(parseFloat(withdot) % 1 !== 0){return yes}
-                else{return no}
+                return floatchecker(thisval)
 
             case "boolean":
-                if(thisval == "true" || thisval == "false"){return yes}
-                if(typeof thisval == type){return yes}
-                else{return no}
+                return booleanchecker(thisval)
 
             case "array":
-                if(Array.isArray(thisval)){return yes}
-                else{return no}
+              return arraychecker(thisval)
+
             case "object":
-                if(Array.isArray(thisval)){return no}
-                if(typeof thisval == type){return yes}
-                else{return no}
+              return objectchecker(thisval)       
+
             default:
                 return err_temp
           }
@@ -91,7 +119,20 @@ function checkkey(object,key,type){
 
 
 
-module.exports = {
-    analyse: analyse,
-    checkkey: checkkey
+
+const Checker = class Checker {
+    constructor(){
+
+    }
+
+    analyse(payload,template){
+    return analyse(payload,template)
+    }
+
+
 }
+
+
+
+
+module.exports = Checker
