@@ -1,0 +1,24 @@
+{
+  "name": "@patrickurlberger/data_checker",
+  "version": "1.0.0",
+  "description": "Check data using a template Object",
+  "main": "data_checker.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PatrickUrlberger/helper_methods/tree/master/javascript/general/data_checker"
+  },
+  "keywords": [
+    "data_checker",
+    "data",
+    "checker",
+    "datachecker",
+    "js",
+    "nodejs",
+    "javascript"
+  ],
+  "author": "patrickurlberger",
+  "license": "ISC"
+}
