@@ -3,6 +3,9 @@ The Data gets compared with a individual template and checks
 if all the keys that are included in the template exist in the 
 passed object too.
 It also checks if the passed data is of the correct datatype
+Its also possible to assign a custom function to the template, that 
+checks the data, if the type custom is used a cutomfunction must be handed over as 
+third parameter
 
 Possible types are:
 
@@ -12,6 +15,8 @@ Possible types are:
 - boolean
 - array
 - object
+- custom
+- [Function]
 
 if a number or a bool is passed as a string the Checker converts it in the 
 datatype it should actually be.

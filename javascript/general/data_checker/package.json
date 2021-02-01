@@ -1,6 +1,6 @@
 {
-  "name": "@patrickurlberger/data_checker",
-  "version": "1.0.0",
+  "name": "@patrickurlberger/up_data_checker",
+  "version": "1.1.0",
   "description": "Check data using a template Object",
   "main": "data_checker.js",
   "scripts": {

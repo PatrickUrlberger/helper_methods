@@ -12,7 +12,9 @@ const mydata = {
     myobject: {rex: "clone", han_solo: "rebell"}, //must be a object (but no array)
     myemail: "palpatine@empire.com",
     myurl: "https://starwars.com",
-    mycustom: 420
+    myfunc: "Jedi",
+    mycustom : 1337
+
 }
 
 const template = {
@@ -24,7 +26,10 @@ const template = {
     myobject: "object",
     myemail: "email",
     myurl: "url",
-    mycustom: "custom"   
+    myfunc: ( value => {
+        return ["Jedi","Sith"].includes(value);
+    }), 
+    mycustom: "custom"
 }
 
 function custom(val){

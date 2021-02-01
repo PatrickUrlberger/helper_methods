@@ -80,7 +80,10 @@ function analyse(payload,template,customfunc){
     
             let type = template[key]
             let result
-            if(type == "custom"){
+            if(type instanceof Function){
+                result = customchecker(payload,key,type)
+            }
+            else if(type == "custom"){
                 result = customchecker(payload,key,customfunc)}
             else{
     
