@@ -64,9 +64,78 @@ function customchecker(object,key,customfunc){
     
 }
 
-function analyse(payload,template,customfunc){
+function regExpChecker(object,key,regexp) {
+    if(key in object){
+        const thisval = object[key]
+        if(typeof(thisval) == "undefined"){return err_key}
+        else {
+            try {
+                let result = regexp.test(thisval);
+
+                if(result){return yes}
+                else{return no}
+
+            } catch (error) {
+                return no
+            }
+
+        }
+    }
+    else{return {existing: false,correct: false, wrongtemplate: false}}
+    
+}
+
+function customPipelineChecker(payload,key,checkPipeLine,customfunc){
+
+    let returnedResult = {
+        existing: true,
+        correct: false,
+        wrongtemplate: false,
+        wrongkey: false
+    };
+
+    if(key in payload){
+        for (let check of checkPipeLine) {
+
+            let result;
+            if(check instanceof RegExp){
+                result = regExpChecker(payload,key,check);
+            }
+            else if(check instanceof Function){
+                result = customchecker(payload,key,check)
+            }
+            else if(Array.isArray(check)){
+                result = customPipelineChecker(payload,key,check,customfunc);
+            }
+            else if(check == "custom"){
+                result = customchecker(payload,key,customfunc)}
+            else {
+                result = checkkey(payload,key,check)
+            } 
+            if(!result.correct){
+                return result;
+            }
+
+            returnedResult = result;
+        }
+        return returnedResult;
+    }
+    else {
+        return no;
+    }
+}
+
+function analyse(payload,template,additional){
 
     try{
+        let customfunc = (data) => true
+        let requirements = [];
+        if(additional instanceof Function){
+            customfunc = additional;
+        }
+        else if(Array.isArray(additional)){
+            requirements = additional;
+        }
         let correct = {}
         let wrong = {}
         let wrongtemplate = []
@@ -80,17 +149,27 @@ function analyse(payload,template,customfunc){
     
             let type = template[key]
             let result
-            if(type instanceof Function){
+            if(type instanceof RegExp){
+                result = regExpChecker(payload,key,type);
+            }
+            else if(type instanceof Function){
                 result = customchecker(payload,key,type)
+            }
+            else if(Array.isArray(type)){
+                result = customPipelineChecker(payload,key,type,customfunc);
             }
             else if(type == "custom"){
                 result = customchecker(payload,key,customfunc)}
             else{
     
-                result= checkkey(payload,key,type)
+                result = checkkey(payload,key,type)
             }    
             if(result.wrongtemplate)
-            {wrongtemplate.push({key:key ,val:payload[key],template: type});return}
+            {wrongtemplate.push({
+                key:key ,
+                val:payload[key],
+                template: Array.isArray(type)?type.map(t => t.toString()).join():type.toString()
+            });return}
             if(result.wrongkey)
             {unavailable.push(key);return}
             if(result.correct){
@@ -104,13 +183,17 @@ function analyse(payload,template,customfunc){
     
         })
   
-        return {
+        let result = {
                 correct: correct,
                 wrong: wrong,
                 unavailable: unavailable,
                 wrongtemplate: wrongtemplate,
-        
+                invalidParameters: null
             }
+        if(Object.keys(result).length != Object.keys(template).length){
+            result.invalidParameters = parseInvalidParameters(result,requirements)
+        }
+        return result;
     }
     catch(error){
         return {error: error}
@@ -171,6 +254,63 @@ function checkkey(object,key,type){
   
 }
 
+function parseInvalidParameters(analysed,requirements = []){
+    try {        
+        let invalidParameters = {}
+        Object.keys(analysed.wrong).forEach(key => {
+            let mode = getErrorInfo(requirements, key);
+            invalidParameters[key] = {info: `invalid value (${mode})` , value: analysed.wrong[key]}
+        });
+        analysed.unavailable.forEach(key => {
+            let mode = getErrorInfo(requirements, key);
+            invalidParameters[key] = `missing (${mode})`
+        });
+        return invalidParameters
+
+    } catch (error) {
+        return {}
+    }
+
+}
+
+function getErrorInfo(requirements, key) {
+
+    try{
+        if(requirements.length > 0){
+            if(requirements.includes(key)){
+                return "required";
+            } 
+            else {
+                let follows = requirements.find(item => item.endsWith(`=>${key}`))
+
+                if(follows){
+                    let isRequired = !follows.startsWith("can:")
+                    if(!isRequired){
+                        follows = follows.substr(4);
+                    }
+                    let prefix = isRequired?"required": "optional"
+                    let followsKey = follows.split("=")[0];
+                    let followsValue = follows.split("=")[1].split("||").join(" or ");
+                    return `${prefix} parameter: only provide if ${followsKey} is set to: '${followsValue}'`;
+                }
+
+                let or = requirements.find(item => item.includes(`||${key}`) || item.includes(`${key}||`));
+
+                if(or){
+                    let alternatives = or.split("||").filter(alt => alt != key);
+                    return `required (alternatives: ${alternatives.join()})`
+                }
+                return "optional";   
+            }
+
+        } else {
+            return "required";
+        }
+
+    } catch(err) {
+        return "required";
+    }
+}
 
 
 
